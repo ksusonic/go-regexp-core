@@ -10,7 +10,7 @@ const DEBUG = false
 
 func scanInput() (string, string) {
 	var fullInput string
-	fmt.Scanf("%s", &fullInput)
+	_, _ = fmt.Scanf("%s", &fullInput)
 	split := strings.Split(fullInput, "|")
 	if len(split) != 2 {
 		log.Fatalln("Incorrect input! Expexted: a|b")
@@ -22,17 +22,24 @@ func CharMatch(regexpChar, char uint8) bool {
 	return regexpChar == uint8('.') || regexpChar == char
 }
 
-func RegexpMatch(regex, input string) bool {
-	if regex != "" && len(regex) != len(input) {
-		return false
-	}
-
+func PatternMatch(regex, input string) bool {
 	for i := range regex {
 		if !CharMatch(regex[i], input[i]) {
 			return false
 		}
 	}
 	return true
+}
+
+func RegexMatch(regex, input string) bool {
+	regEndPos := len(regex)
+	for regEndPos <= len(input) {
+		if PatternMatch(regex, input[regEndPos-len(regex):regEndPos]) {
+			return true
+		}
+		regEndPos++
+	}
+	return false
 }
 
 func main() {
@@ -47,5 +54,5 @@ func main() {
 		return
 	}
 
-	fmt.Println(RegexpMatch(regex, input))
+	fmt.Println(RegexMatch(regex, input))
 }
