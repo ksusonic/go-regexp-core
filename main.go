@@ -18,6 +18,23 @@ func scanInput() (string, string) {
 	return split[0], split[1]
 }
 
+func CharMatch(regexpChar, char uint8) bool {
+	return regexpChar == uint8('.') || regexpChar == char
+}
+
+func RegexpMatch(regex, input string) bool {
+	if regex != "" && len(regex) != len(input) {
+		return false
+	}
+
+	for i := range regex {
+		if !CharMatch(regex[i], input[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 func main() {
 	regex, input := scanInput()
 
@@ -25,15 +42,10 @@ func main() {
 		log.Printf("comparing '%s' and '%s'", regex, input)
 	}
 
-	// pre-section of code
-	if regex == input || regex == "" {
+	if regex == "" {
 		fmt.Println(true)
 		return
 	}
 
-	if regex == "." && len(input) == 1 {
-		fmt.Println(true)
-	} else {
-		fmt.Println(false)
-	}
+	fmt.Println(RegexpMatch(regex, input))
 }
