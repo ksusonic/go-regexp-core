@@ -31,15 +31,46 @@ func PatternMatch(regex, input string) bool {
 	return true
 }
 
-func RegexMatch(regex, input string) bool {
-	regEndPos := len(regex)
-	for regEndPos <= len(input) {
-		if PatternMatch(regex, input[regEndPos-len(regex):regEndPos]) {
-			return true
-		}
-		regEndPos++
+func ProcessRegexp(regex string) (string, bool, bool) {
+	var startPref, endPref = strings.HasPrefix("^", regex), strings.HasSuffix("$", regex)
+	if startPref {
+		regex = strings.TrimPrefix("^", regex)
 	}
-	return false
+	if endPref {
+		regex = strings.TrimSuffix("$", regex)
+	}
+	return regex, startPref, endPref
+}
+
+func RegexMatch(regex, input string) bool {
+	regex, startFlag, endFlag := ProcessRegexp(regex)
+	regEndPos := len(regex)
+
+	if startFlag && endFlag {
+		if len(regex) != len(input) {
+			return false
+		} else {
+			return PatternMatch(regex, input)
+		}
+	} else if startFlag || endFlag {
+		if len(regex) <= len(input) {
+			if startFlag {
+				return PatternMatch(regex, input[:len(regex)])
+			} else /* endFlag */ {
+				return PatternMatch(regex, input[len(input)-len(regex):len(regex)])
+			}
+		} else {
+			return false
+		}
+	} else {
+		for regEndPos <= len(input) {
+			if PatternMatch(regex, input[regEndPos-len(regex):regEndPos]) {
+				return true
+			}
+			regEndPos++
+		}
+		return false
+	}
 }
 
 func main() {
