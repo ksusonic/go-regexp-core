@@ -1,17 +1,19 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 )
 
 const DEBUG = false
 
 func scanInput() (string, string) {
-	var fullInput string
-	_, _ = fmt.Scanf("%s", &fullInput)
-	split := strings.Split(fullInput, "|")
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	split := strings.Split(scanner.Text(), "|")
 	if len(split) != 2 {
 		log.Fatalln("Incorrect input! Expexted: a|b")
 	}
@@ -23,6 +25,10 @@ func CharMatch(regexpChar, char uint8) bool {
 }
 
 func PatternMatch(regex, input string) bool {
+	if DEBUG {
+		log.Printf("comparing regex '%s' to '%s'", regex, input)
+	}
+
 	for i := range regex {
 		if !CharMatch(regex[i], input[i]) {
 			return false
@@ -32,12 +38,12 @@ func PatternMatch(regex, input string) bool {
 }
 
 func ProcessRegexp(regex string) (string, bool, bool) {
-	var startPref, endPref = strings.HasPrefix("^", regex), strings.HasSuffix("$", regex)
+	var startPref, endPref = strings.HasPrefix(regex, "^"), strings.HasSuffix(regex, "$")
 	if startPref {
-		regex = strings.TrimPrefix("^", regex)
+		regex = strings.TrimPrefix(regex, "^")
 	}
 	if endPref {
-		regex = strings.TrimSuffix("$", regex)
+		regex = strings.TrimSuffix(regex, "$")
 	}
 	return regex, startPref, endPref
 }
@@ -57,7 +63,7 @@ func RegexMatch(regex, input string) bool {
 			if startFlag {
 				return PatternMatch(regex, input[:len(regex)])
 			} else /* endFlag */ {
-				return PatternMatch(regex, input[len(input)-len(regex):len(regex)])
+				return PatternMatch(regex, input[len(input)-len(regex):])
 			}
 		} else {
 			return false
@@ -75,10 +81,6 @@ func RegexMatch(regex, input string) bool {
 
 func main() {
 	regex, input := scanInput()
-
-	if DEBUG {
-		log.Printf("comparing '%s' and '%s'", regex, input)
-	}
 
 	if regex == "" {
 		fmt.Println(true)
